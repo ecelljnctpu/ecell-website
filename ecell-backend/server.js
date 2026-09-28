@@ -32,6 +32,7 @@ const globalLimiter = rateLimit({
 // Baaki routes jaise eventRoutes, teamRoutes baad me judenge
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Middlewares
 
