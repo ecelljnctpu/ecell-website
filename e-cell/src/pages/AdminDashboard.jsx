@@ -136,7 +136,7 @@ export default function AdminDashboard() {
     formData.append("banner", eventFile); //[cite: 10]
 
     try {
-    await axios.post(`${API_BASE}/api/events`, formData, {
+    await axios.post(`${API_BASE}/events`, formData, {
   headers: {
     ...authConfig.headers,
   },
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
     formData.append("logo", sponsorLogoFile);
 
     try {
-      await axios.post("http://localhost:5000/api/sponsors", formData);
+      await axios.post(`${API_BASE}/sponsors`, formData);
       alert("Sponsor added successfully!");
       setNewSponsor({ name: "", tier: "Title Sponsor", websiteUrl: "" });
       setSponsorLogoFile(null);
