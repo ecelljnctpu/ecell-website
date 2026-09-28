@@ -77,7 +77,7 @@ export default function AdminDashboard() {
   // fetchData function ke andar:
   const fetchSponsors = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/sponsors");
+      const res = await axios.get(`${API_BASE}/sponsors`);
       setSponsors(res.data || []);
     } catch (err) {
       console.error("Sponsors fetch error:", err);
@@ -136,9 +136,11 @@ export default function AdminDashboard() {
     formData.append("banner", eventFile); //[cite: 10]
 
     try {
-      await axios.post(`${API_BASE}/events`, formData, {
-        headers: { ...authConfig.headers, "Content-Type": "multipart/form-data" }, //[cite: 10]
-      });
+    await axios.post(`${API_BASE}/api/events`, formData, {
+  headers: {
+    ...authConfig.headers,
+  },
+});
       alert("Event added successfully!"); //[cite: 10]
       setEventData({ title: "", description: "", category: "upcoming", date: "", venue: "", registrationLink: "" }); //[cite: 10]
       setEventFile(null); //[cite: 10]
@@ -187,7 +189,7 @@ export default function AdminDashboard() {
   const handleDeleteSponsor = async (id) => {
     if (!window.confirm("Are you sure you want to delete this sponsor?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/sponsors/${id}`);
+      await axios.delete(`${API_BASE}/sponsors/${id}`);
       setSponsors((prev) => prev.filter((item) => item._id !== id));
     } catch (error) {
       alert("Delete failed: " + error.message);
