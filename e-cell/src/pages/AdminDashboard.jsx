@@ -14,7 +14,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "https://ecell-website-ce9d.onrender.com/api";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("events"); // 'events' | 'team' | 'speakers' | 'gallery' | 'applications'

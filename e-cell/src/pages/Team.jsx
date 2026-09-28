@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Sparkles, ExternalLink } from "lucide-react";
+import { API_BASE } from "../config";
 
 export default function Team() {
   const [teamMembers, setTeamMembers] = useState([]);
@@ -10,7 +11,7 @@ export default function Team() {
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/team");
+        const res = await axios.get(`${API_BASE}/api/team`);
         // console.log("Database Team Data:", res.data);
         // Sirf database ka data set hoga, koi dummy fallback nahi
         setTeamMembers(res.data || []);

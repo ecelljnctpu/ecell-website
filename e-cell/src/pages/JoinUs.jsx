@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
+import { API_BASE } from "../config";
 
 export default function JoinUs() {
   const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ export default function JoinUs() {
     setStatus({ loading: true, success: false, error: "" });
 
     try {
-      await axios.post("http://localhost:5000/api/join", formData);
+      await axios.post(`${API_BASE}/api/join`, formData);
       setStatus({ loading: false, success: true, error: "" });
       setFormData({
         fullName: "",

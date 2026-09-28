@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { Calendar, MapPin, ArrowRight, Sparkles } from "lucide-react";
+import { API_BASE } from "../config";
 
 export default function HomeEventsPreview() {
   const [events, setEvents] = useState([]);
@@ -11,7 +12,7 @@ export default function HomeEventsPreview() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/events");
+        const res = await axios.get(`${API_BASE}/api/events`);
         setEvents(res.data);
       } catch (err) {
         console.error("Error fetching events:", err);

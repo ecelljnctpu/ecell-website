@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import { Calendar, MapPin, Clock, ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
+import { API_BASE } from "../config";
 
 export default function EventDetail() {
   const { id } = useParams();
@@ -14,7 +15,7 @@ export default function EventDetail() {
     if (!event && id) {
       const fetchEventDetail = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/events/${id}`);
+          const res = await axios.get(`${API_BASE}/api/events/${id}`);
           setEvent(res.data);
         } catch (err) {
           console.error("Error fetching event detail:", err);

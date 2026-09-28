@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Calendar } from "lucide-react";
+import { API_BASE } from "../config";
 
 export default function Gallery() {
   const [gallery, setGallery] = useState([]);
@@ -10,7 +11,7 @@ export default function Gallery() {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/gallery");
+        const res = await axios.get(`${API_BASE}/api/gallery`);
         setGallery(res.data || []);
       } catch (err) {
         console.error("Gallery fetch error:", err);
@@ -46,7 +47,7 @@ export default function Gallery() {
       {/* Header */}
       <div className="max-w-4xl mx-auto text-center mb-10">
         <h1 className="text-4xl md:text-5xl font-extrabold font-cinzel tracking-wider text-[#0b1626] uppercase">
-          E-Summit Gallery
+          E-Cell Gallery
         </h1>
         <p className="mt-3 text-sm md:text-base italic text-slate-700 font-serif">
           Explore every landmark moment, captured across events and dates.

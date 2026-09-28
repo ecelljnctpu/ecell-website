@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { API_BASE } from "../config";
 
 export default function Speakers() {
   const [speakers, setSpeakers] = useState([]);
@@ -8,7 +9,7 @@ export default function Speakers() {
   useEffect(() => {
     const fetchSpeakers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/speakers");
+        const res = await axios.get(`${API_BASE}/api/speakers`);
         setSpeakers(res.data || []);
       } catch (err) {
         console.error("Error fetching speakers:", err);

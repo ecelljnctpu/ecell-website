@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ArrowRight, Play, Pause } from "lucide-react";
+import { API_BASE } from "../config";
 
 export default function HomeGalleryPreview() {
   const [items, setItems] = useState([]);
@@ -12,7 +13,7 @@ export default function HomeGalleryPreview() {
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/gallery");
+        const res = await axios.get(`${API_BASE}/api/gallery`);
         setItems(res.data || []);
       } catch (err) {
         console.error("Gallery preview fetch error:", err);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { Mail, ArrowRight } from "lucide-react";
+import { API_BASE } from "../config";
 
 export default function Sponsors() {
   const [sponsors, setSponsors] = useState([]);
@@ -11,7 +12,7 @@ export default function Sponsors() {
   const fetchSponsors = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/sponsors?t=${Date.now()}`
+        `${API_BASE}/api/sponsors?t=${Date.now()}`
       );
       setSponsors(res.data || []);
     } catch (err) {
@@ -130,7 +131,7 @@ export default function Sponsors() {
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="mailto:ecell@nitrr.ac.in?subject=Sponsorship%20Inquiry%20-%20E-Summit"
+              href="mailto:ecelljnctpu@gmail.com?subject=Sponsorship%20Inquiry%20-%20E-Summit"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#c6a45c] hover:bg-[#d8b872] text-[#071322] font-cinzel font-bold text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg hover:shadow-[#c6a45c]/30 hover:-translate-y-0.5"
             >
               <Mail size={16} /> Contact Us to Sponsor
