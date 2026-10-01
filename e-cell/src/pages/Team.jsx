@@ -12,8 +12,6 @@ export default function Team() {
     const fetchTeam = async () => {
       try {
         const res = await axios.get(`${API_BASE}/api/team`);
-        // console.log("Database Team Data:", res.data);
-        // Sirf database ka data set hoga, koi dummy fallback nahi
         setTeamMembers(res.data || []);
       } catch (err) {
         console.error("Error fetching team:", err);
@@ -25,19 +23,22 @@ export default function Team() {
     fetchTeam();
   }, []);
 
+  // Naye 6 Filters
   const categories = [
     { label: "ALL", value: "all" },
-    { label: "OVERALL COORDINATORS", value: "overall coordinators" },
-    { label: "TECHNICAL", value: "technical" },
-    { label: "EVENTS & LOGISTICS", value: "events & logistics" },
-    { label: "MARKETING & PR", value: "marketing & pr" },
-    { label: "DESIGN & MEDIA", value: "design & media" }
+    { label: "LEADER", value: "leader" },
+    { label: "TECHNICAL TEAM", value: "technical team" },
+    { label: "CORPORATE RELATIONS TEAM", value: "corporate relations team" },
+    { label: "SOCIAL MEDIA & DESIGNING TEAM", value: "social media & designing team" },
+    { label: "RESEARCH & DEVELOPMENT TEAM", value: "research & development team" },
+    { label: "OPERATION AND MANAGEMENT DEPARTMENT", value: "operation and management department" }
   ];
 
+  // Filtering Logic
   const filteredTeam = teamMembers.filter((member) => {
     if (activeTab === "all") return true;
     const memberCat = (member.category || member.role || "").toLowerCase().trim();
-    return memberCat.includes(activeTab.toLowerCase().trim());
+    return memberCat === activeTab.toLowerCase().trim() || memberCat.includes(activeTab.toLowerCase().trim());
   });
 
   return (
@@ -66,10 +67,11 @@ export default function Team() {
             <button
               key={cat.value}
               onClick={() => setActiveTab(cat.value)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-cinzel tracking-wider uppercase transition-all shadow-md ${activeTab === cat.value
-                ? "bg-[#0d182b] text-[#f3ca65] font-bold border border-[#c5a059]"
-                : "bg-[#e2d3b2] text-[#0f1d38] border border-[#c5a059]/40 hover:bg-[#d8c59c]"
-                }`}
+              className={`px-4 py-2 rounded-xl text-xs font-cinzel tracking-wider uppercase transition-all shadow-md ${
+                activeTab === cat.value
+                  ? "bg-[#0d182b] text-[#f3ca65] font-bold border border-[#c5a059]"
+                  : "bg-[#e2d3b2] text-[#0f1d38] border border-[#c5a059]/40 hover:bg-[#d8c59c]"
+              }`}
             >
               {cat.label}
             </button>
@@ -88,7 +90,7 @@ export default function Team() {
                 key={member._id || member.id}
                 className="group relative bg-[#0b1626] border border-[#c5a059]/40 hover:border-[#f3ca65] rounded-2xl p-6 flex flex-col items-center text-center shadow-2xl transition-all duration-300 hover:-translate-y-2 text-white overflow-hidden"
               >
-                {/* Member Image (Strictly from Database/Admin) */}
+                {/* Member Image */}
                 <div className="relative w-32 h-32 rounded-full overflow-hidden mb-5 border-2 border-[#c5a059] shadow-inner group-hover:scale-105 transition-transform duration-300 bg-slate-950 flex items-center justify-center">
                   <img
                     src={
@@ -100,7 +102,8 @@ export default function Team() {
                     alt={member.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.target.src = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
+                      e.target.src =
+                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80";
                     }}
                   />
                 </div>
@@ -114,12 +117,19 @@ export default function Team() {
                 </h3>
 
                 {/* Role */}
-                <p className="text-xs text-[#f3ca65] font-cinzel tracking-widest uppercase mb-4">
-                  {member.role || member.category}
+                <p className="text-xs text-[#f3ca65] font-cinzel tracking-widest uppercase mb-1">
+                  {member.role || "Core Team"}
                 </p>
 
-                {/* LinkedIn Link on Hover */}
-                <div className="w-full pt-2 border-t border-slate-800">
+                {/* Department / Category Tag */}
+                {member.category && (
+                  <span className="text-[10px] text-slate-300 bg-[#15253d] px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-4 border border-[#c5a059]/20">
+                    {member.category}
+                  </span>
+                )}
+
+                {/* LinkedIn Link */}
+                <div className="w-full pt-2 border-t border-slate-800 mt-auto">
                   {(member.linkedinUrl || member.linkedin || member.link) ? (
                     <a
                       href={member.linkedinUrl || member.linkedin || member.link}
@@ -143,7 +153,7 @@ export default function Team() {
 
             {filteredTeam.length === 0 && !loading && (
               <div className="col-span-full text-center py-16 text-slate-800 font-cinzel text-xs tracking-wider">
-                No team members found in the database. Please add members from the Admin Dashboard.
+                No team members found in this category.
               </div>
             )}
           </div>

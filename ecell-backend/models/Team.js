@@ -9,7 +9,21 @@ const teamSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: "Core Team",
+      default: "Member", // Example: Lead, Co-Lead, Member
+      trim: true,
+    },
+    category: {
+      type: String,
+      required: true,
+      enum: [
+        "Leader",
+        "Technical Team",
+        "Corporate Relations Team",
+        "Social Media & Designing Team",
+        "Research & Development Team",
+        "Operation and Management Department",
+      ],
+      default: "Leader",
     },
     sessionYear: {
       type: String,

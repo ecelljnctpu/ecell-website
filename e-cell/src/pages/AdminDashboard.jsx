@@ -136,11 +136,11 @@ export default function AdminDashboard() {
     formData.append("banner", eventFile); //[cite: 10]
 
     try {
-    await axios.post(`${API_BASE}/events`, formData, {
-  headers: {
-    ...authConfig.headers,
-  },
-});
+      await axios.post(`${API_BASE}/events`, formData, {
+        headers: {
+          ...authConfig.headers,
+        },
+      });
       alert("Event added successfully!"); //[cite: 10]
       setEventData({ title: "", description: "", category: "upcoming", date: "", venue: "", registrationLink: "" }); //[cite: 10]
       setEventFile(null); //[cite: 10]
@@ -199,37 +199,44 @@ export default function AdminDashboard() {
 
 
   // --- Handlers: Team ---[cite: 10]
- const handleCreateTeam = async (e) => {
-  e.preventDefault();
-  if (!teamFile) return alert("Please select a member photo");
+  const handleCreateTeam = async (e) => {
+    e.preventDefault();
+    if (!teamFile) return alert("Please select a member photo");
 
-  try {
-    const optimizedFile = await compressImage(teamFile);
+    try {
+      const optimizedFile = await compressImage(teamFile);
 
-    const formData = new FormData();
-    formData.append("name", teamData.name || "");
-    formData.append("role", teamData.role || "Core Team");
-    formData.append("sessionYear", teamData.sessionYear || "2024-27");
-    formData.append("linkedinUrl", teamData.linkedinUrl || "");
-    // Sirf ek key 'photo' append karein:
-    formData.append("photo", optimizedFile);
+      const formData = new FormData();
+      formData.append("name", teamData.name || "");
+      formData.append("role", teamData.role || "Core Team");
+      formData.append("category", teamData.category || "Leader"); // 👈 1. Category yahan append karein
+      formData.append("sessionYear", teamData.sessionYear || "2024-27");
+      formData.append("linkedinUrl", teamData.linkedinUrl || "");
+      // Sirf ek key 'photo' append karein:
+      formData.append("photo", optimizedFile);
 
-    // DHYAN DEIN: Content-Type header yahan se HATA DIYA gaya hai
-    await axios.post(`${API_BASE}/team`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      // DHYAN DEIN: Content-Type header yahan se HATA DIYA gaya hai
+      await axios.post(`${API_BASE}/team`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    alert("Team member added successfully!");
-    setTeamData({ name: "", role: "", sessionYear: "2024-27", linkedinUrl: "" });
-    setTeamFile(null);
-    fetchData();
-  } catch (err) {
-    console.error("Team Add Error:", err);
-    alert(err.response?.data?.message || "Error adding member");
-  }
-};
+      alert("Team member added successfully!");
+      setTeamData({
+        name: "",
+        role: "",
+        category: "Leader", // 👈 2. Reset me bhi default rakh dein
+        sessionYear: "2024-27",
+        linkedinUrl: "",
+      });
+      setTeamFile(null);
+      fetchData();
+    } catch (err) {
+      console.error("Team Add Error:", err);
+      alert(err.response?.data?.message || "Error adding member");
+    }
+  };
 
   const handleDeleteTeam = async (id) => {
     if (!confirm("Are you sure?")) return; //[cite: 10]
@@ -326,45 +333,45 @@ export default function AdminDashboard() {
   };
 
 
-// Image compression helper function
-const compressImage = (file) => {
-  return new Promise((resolve) => {
-    // Agar file 1MB se choti hai to compress karne ki zaroorat nahi
-    if (!file || file.size < 1024 * 1024) {
-      return resolve(file);
-    }
+  // Image compression helper function
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      // Agar file 1MB se choti hai to compress karne ki zaroorat nahi
+      if (!file || file.size < 1024 * 1024) {
+        return resolve(file);
+      }
 
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 1000;
-        const scaleSize = MAX_WIDTH / img.width;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1000;
+          const scaleSize = MAX_WIDTH / img.width;
 
-        canvas.width = MAX_WIDTH;
-        canvas.height = img.height * (img.width > MAX_WIDTH ? scaleSize : 1);
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * (img.width > MAX_WIDTH ? scaleSize : 1);
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        canvas.toBlob(
-          (blob) => {
-            const compressedFile = new File([blob], file.name, {
-              type: "image/jpeg",
-              lastModified: Date.now(),
-            });
-            resolve(compressedFile);
-          },
-          "image/jpeg",
-          0.8
-        );
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            0.8
+          );
+        };
       };
-    };
-  });
-};
+    });
+  };
 
 
 
@@ -704,7 +711,7 @@ const compressImage = (file) => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. John Doe"
+                      placeholder="e.g. Rohit Sharma"
                       value={teamData.name}
                       onChange={(e) => setTeamData({ ...teamData, name: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-indigo-500"
@@ -721,6 +728,23 @@ const compressImage = (file) => {
                       onChange={(e) => setTeamData({ ...teamData, role: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:border-indigo-500"
                     />
+                  </div>
+
+                  {/* Department / Category Selection */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-300">Department / Category</label>
+                    <select
+                      value={teamData.category || "Leader"}
+                      onChange={(e) => setTeamData({ ...teamData, category: e.target.value })}
+                      className="w-full p-2.5 rounded bg-gray-900 border border-gray-700 text-white focus:outline-none focus:border-purple-500"
+                    >
+                      <option value="Leader">Leader</option>
+                      <option value="Technical Team">Technical Team</option>
+                      <option value="Corporate Relations Team">Corporate Relations Team</option>
+                      <option value="Social Media & Designing Team">Social Media & Designing Team</option>
+                      <option value="Research & Development Team">Research & Development Team</option>
+                      <option value="Operation and Management Department">Operation and Management Department</option>
+                    </select>
                   </div>
 
                   <div>
@@ -746,7 +770,7 @@ const compressImage = (file) => {
                     />
                   </div>
 
-                
+
 
 
 

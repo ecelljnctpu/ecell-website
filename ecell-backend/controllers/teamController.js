@@ -12,9 +12,11 @@ exports.getAllTeam = async (req, res) => {
 };
 
 // Member add karein
+// Member add karein
 exports.createTeamMember = async (req, res) => {
   try {
-    const { name, role, sessionYear, linkedinUrl, photoUrl, imageUrl } = req.body;
+    // 1. category ko bhi req.body se nikalein
+    const { name, role, category, sessionYear, linkedinUrl, photoUrl, imageUrl } = req.body;
 
     if (!name || name.trim() === "") {
       return res.status(400).json({ message: "Name field is required" });
@@ -45,6 +47,7 @@ exports.createTeamMember = async (req, res) => {
     const newMemberData = {
       name: name.trim(),
       role: (role || "Core Team").trim(),
+      category: (category || "Leader").trim(), // 👈 2. Category yahan pass karein
       sessionYear: sessionYear || "2024-27",
       photoUrl: finalImageUrl,
       imageUrl: finalImageUrl,
@@ -57,7 +60,6 @@ exports.createTeamMember = async (req, res) => {
 
   } catch (error) {
     console.error("TEAM_SAVE_ERROR:", error);
-    // EXACT error message client ko bhejo taaki popup me pata chale
     return res.status(500).json({
       message: error.message || "Failed to save team member",
     });
