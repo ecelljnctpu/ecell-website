@@ -4,6 +4,7 @@ import AboutSection from "../components/AboutSection";
 import HomeEventsPreview from "../components/HomeEventsPreview";
 import HomeGalleryPreview from "../components/HomeGalleryPreview";
 import Speakers from "../components/Speakers";
+import HomeBlogs from "../components/HomeBlogs";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
 
       {/* 4. Distinguished Speakers */}
       <Speakers />
+      <HomeBlogs/>
 
       <HomeGalleryPreview />
     </div>

@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+
 import Footer from "./components/Footer";
 
 // Pages
@@ -11,6 +12,8 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard"
 import EventDetail from "./pages/EventDetail";
 import EventPage from "./pages/Events";
+import Blogs from "./pages/Blogs";
+import BlogDetail from "./pages/BlogDetail";
 import Gallery from "./pages/Gallery";
 
 import Team from "./pages/Team";
@@ -18,7 +21,7 @@ import Sponsors from "./pages/Sponsors";
 
 export default function App() {
   return (
-   <div className="w-full min-h-screen bg-[#D1BE94] text-[#070d18] flex flex-col selection:bg-[#c5a059] selection:text-white">
+    <div className="w-full min-h-screen bg-[#D1BE94] text-[#070d18] flex flex-col selection:bg-[#c5a059] selection:text-white">
       {/* Navbar */}
       <Routes>
         {/* ================= PUBLIC ROUTES (Navbar Visible) ================= */}
@@ -38,6 +41,8 @@ export default function App() {
         <Route path="/sponsors" element={<><Navbar /><div className="pt-20"><Sponsors /></div></>} />
         <Route path="/events/:id" element={<EventDetail />} />
         <Route path="/events" element={<EventPage />} />
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/gallery" element={<Gallery />} />
 
         <Route

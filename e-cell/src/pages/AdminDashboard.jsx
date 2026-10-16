@@ -12,12 +12,13 @@ import {
   Award,
   X,
   Image as ImageIcon,
+  BookOpen
 } from "lucide-react";
 
 const API_BASE = "https://ecell-website-ce9d.onrender.com/api";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("events"); // 'events' | 'team' | 'speakers' | 'gallery' | 'applications'
+  const [activeTab, setActiveTab] = useState("events"); // 'events' | 'team' | 'speakers' | 'gallery' |'blog'| 'applications'
   const [sidebarOpen, setSidebarOpen] = useState(false); //[cite: 10]
 
   // Data States
@@ -64,6 +65,19 @@ export default function AdminDashboard() {
   });
   const [galleryFile, setGalleryFile] = useState(null);
 
+
+  const [blogs, setBlogs] = useState([]);
+  const [blogData, setBlogData] = useState({
+    title: "",
+    category: "Startup & Innovation",
+    excerpt: "",
+    content: "",
+    author: "",
+    authorContact: "",
+    publishDate: new Date().toISOString().split("T")[0],
+  });
+  const [blogFile, setBlogFile] = useState(null);
+  const [blogUploading, setBlogUploading] = useState(false);
 
 
   const [sponsors, setSponsors] = useState([]);
@@ -321,6 +335,81 @@ export default function AdminDashboard() {
     }
   };
 
+
+  // Blogs fetch function
+  const fetchBlogs = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/blogs`);
+      setBlogs(res.data || []);
+    } catch (err) {
+      console.error("Error fetching blogs:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "blogs") {
+      fetchBlogs();
+    }
+  }, [activeTab]);
+
+  // Blog submit handler
+  const handleBlogSubmit = async (e) => {
+    e.preventDefault();
+    if (!blogFile) return alert("Please select a cover image!");
+
+    try {
+      setBlogUploading(true);
+      const formData = new FormData();
+      formData.append("title", blogData.title);
+      formData.append("category", blogData.category);
+      formData.append("excerpt", blogData.excerpt);
+      formData.append("content", blogData.content);
+      formData.append("author", blogData.author);
+      formData.append("authorContact", blogData.authorContact);
+      formData.append("publishDate", blogData.publishDate);
+      formData.append("image", blogFile);
+
+      const token = localStorage.getItem("adminToken"); // ya jahan aapka token store ho
+      await axios.post(`${API_BASE}/api/blogs`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert("Blog successfully published!");
+      setBlogData({
+        title: "",
+        category: "Startup & Innovation",
+        excerpt: "",
+        content: "",
+        author: "",
+        authorContact: "",
+        publishDate: new Date().toISOString().split("T")[0],
+      });
+      setBlogFile(null);
+      fetchBlogs();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to publish blog");
+    } finally {
+      setBlogUploading(false);
+    }
+  };
+
+  // Blog delete handler
+  const handleDeleteBlog = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this blog?")) return;
+    try {
+      const token = localStorage.getItem("adminToken");
+      await axios.delete(`${API_BASE}/api/blogs/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Blog deleted!");
+      fetchBlogs();
+    } catch (err) {
+      alert("Delete failed");
+    }
+  };
+
+
+
   // --- Handlers: Applications ---[cite: 10]
   const handleDeleteApplication = async (id) => {
     if (!confirm("Delete this application?")) return; //[cite: 10]
@@ -475,6 +564,20 @@ export default function AdminDashboard() {
                 </span>
               )}
             </button>
+
+
+            <button
+              onClick={() => setActiveTab("blogs")}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all ${activeTab === "blogs"
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/30"
+                : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                }`}
+            >
+              <BookOpen size={18} />
+              <span>Manage Blogs</span>
+            </button>
+
+
           </nav>
         </div>
 
@@ -822,6 +925,187 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+
+
+          {activeTab === "blogs" && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-bold text-white">Blogs Management</h2>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Left Column: Create Blog Form (1 column wide) */}
+                <div className="bg-[#0b1626]/80 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+                  <h3 className="text-sm font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                    <span>+</span> Publish New Blog
+                  </h3>
+
+                  <form onSubmit={handleBlogSubmit} className="space-y-3">
+                    <div>
+                      <label className="text-[11px] text-slate-400">Title</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. The Future of AI in Startups"
+                        value={blogData.title}
+                        onChange={(e) => setBlogData({ ...blogData, title: e.target.value })}
+                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] text-slate-400">Category</label>
+                        <select
+                          value={blogData.category}
+                          onChange={(e) => setBlogData({ ...blogData, category: e.target.value })}
+                          className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-purple-500"
+                        >
+                          <option value="Startup & Innovation">Startup & Innovation</option>
+                          <option value="E-Summit Highlights">E-Summit Highlights</option>
+                          <option value="Case Study">Case Study</option>
+                          <option value="Tech & AI">Tech & AI</option>
+                          <option value="Founder Stories">Founder Stories</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-slate-400">Date</label>
+                        <input
+                          type="date"
+                          value={blogData.publishDate}
+                          onChange={(e) => setBlogData({ ...blogData, publishDate: e.target.value })}
+                          className="w-full p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-purple-500"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[11px] text-slate-400">Author Name</label>
+                        <input
+                          type="text"
+                          placeholder="Author Name"
+                          value={blogData.author}
+                          onChange={(e) => setBlogData({ ...blogData, author: e.target.value })}
+                          className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-purple-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-slate-400">Contact / LinkedIn</label>
+                        <input
+                          type="text"
+                          placeholder="Email ya Link"
+                          value={blogData.authorContact}
+                          onChange={(e) => setBlogData({ ...blogData, authorContact: e.target.value })}
+                          className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-purple-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-slate-400">Card Excerpt (Short)</label>
+                      <textarea
+                        rows="2"
+                        placeholder="Brief summary for preview..."
+                        value={blogData.excerpt}
+                        onChange={(e) => setBlogData({ ...blogData, excerpt: e.target.value })}
+                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-slate-400">Full Content</label>
+                      <textarea
+                        rows="5"
+                        placeholder="Write full article here..."
+                        value={blogData.content}
+                        onChange={(e) => setBlogData({ ...blogData, content: e.target.value })}
+                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white outline-none focus:border-purple-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] text-slate-400">Cover Image</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setBlogFile(e.target.files[0])}
+                        className="w-full text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-purple-600 file:text-white hover:file:bg-purple-700 cursor-pointer"
+                        required
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={blogUploading}
+                      className="w-full py-2.5 rounded-xl bg-purple-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-purple-700 transition"
+                    >
+                      {blogUploading ? "Publishing..." : "Publish Blog"}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Right Column: Published Blogs List with Delete (2 columns wide) */}
+                <div className="lg:col-span-2 space-y-4">
+                  <h3 className="text-sm font-bold text-slate-300">
+                    Published Articles ({blogs.length})
+                  </h3>
+
+                  {blogs.length === 0 ? (
+                    <div className="p-8 text-center bg-[#0b1626]/40 rounded-2xl border border-slate-800 text-slate-400 text-xs">
+                      No blogs published yet. Use the form to add one.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {blogs.map((b) => (
+                        <div
+                          key={b._id}
+                          className="bg-[#0b1626] border border-slate-800 rounded-xl overflow-hidden flex flex-col justify-between shadow-lg"
+                        >
+                          <div className="relative h-32 w-full bg-slate-950">
+                            <img
+                              src={b.imageUrl}
+                              alt={b.title}
+                              className="w-full h-full object-cover"
+                            />
+                            <span className="absolute top-2 left-2 bg-purple-600/90 text-white text-[9px] font-bold px-2 py-0.5 rounded">
+                              {b.category}
+                            </span>
+                          </div>
+
+                          <div className="p-3 flex-grow flex flex-col justify-between">
+                            <div>
+                              <h4 className="text-xs font-bold text-white line-clamp-1 mb-1">
+                                {b.title}
+                              </h4>
+                              <p className="text-[11px] text-slate-400 line-clamp-2">
+                                {b.excerpt}
+                              </p>
+                            </div>
+
+                            <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+                              <span>By {b.author}</span>
+                              <button
+                                onClick={() => handleDeleteBlog(b._id)}
+                                className="text-red-400 hover:text-red-300 font-bold hover:underline"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+
 
           {/* TAB 3: SPEAKERS (FILE UPLOAD) */}
           {activeTab === "speakers" && (

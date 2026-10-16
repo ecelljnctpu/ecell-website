@@ -1,19 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const verifyAdmin = require("../middleware/authMiddleware");
-const { upload } = require("../config/cloudinary");
-const {
-  getBlogs,
-  getBlogBySlug,
-  createBlog,
-  updateBlog,
-  deleteBlog,
-} = require("../controllers/blogController");
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-router.get("/", getBlogs);
-router.get("/:slug", getBlogBySlug);
-router.post("/", verifyAdmin, upload.single("coverImage"), createBlog);
-router.put("/:id", verifyAdmin, upload.single("coverImage"), updateBlog);
-router.delete("/:id", verifyAdmin, deleteBlog);
+const authMiddleware = require("../middlewares/authMiddleware"); // Apka JWT middleware
+const blogController = require("../controllers/blogController");
+
+router.get("/", blogController.getAllBlogs);
+router.get("/:id", blogController.getBlogById);
+router.post("/:id/like", blogController.likeBlog);
+router.post("/:id/comment", blogController.addComment);
+
+// Admin-Only Routes
+router.post("/", authMiddleware, upload.single("image"), blogController.createBlog);
+router.delete("/:id", authMiddleware, blogController.deleteBlog);
 
 module.exports = router;

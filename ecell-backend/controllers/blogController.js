@@ -1,98 +1,146 @@
 const Blog = require("../models/Blog");
-const uploadBuffer = require("../utils/uploadToCloudinary");
+const { cloudinary } = require("../config/cloudinary");
 
-// GET /api/blogs (Public)
-exports.getBlogs = async (req, res) => {
+// 1. Get all blogs with search & filter
+exports.getAllBlogs = async (req, res) => {
   try {
-    const blogs = await Blog.find().sort({ createdAt: -1 });
+    const { search, category, sort, limit } = req.query;
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search,$options: "i" } },
+        { excerpt: { $regex: search,$options: "i" } },
+      ];
+    }
+
+    if (category && category !== "All") {
+      query.category = category;
+    }
+
+    let sortOption = { createdAt: -1 }; // default: latest
+    if (sort === "most_liked") sortOption = { likes: -1 };
+    if (sort === "trending") sortOption = { views: -1, likes: -1 };
+
+    let blogsQuery = Blog.find(query).sort(sortOption);
+    if (limit) blogsQuery = blogsQuery.limit(parseInt(limit));
+
+    const blogs = await blogsQuery.exec();
     res.status(200).json(blogs);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch blogs", error: error.message });
   }
 };
 
-// GET /api/blogs/:slug (Public - Single blog post)
-exports.getBlogBySlug = async (req, res) => {
+// 2. Get single blog by ID & increment views
+exports.getBlogById = async (req, res) => {
   try {
-    const blog = await Blog.findOne({ slug: req.params.slug });
-    if (!blog) return res.status(404).json({ message: "Blog post not found" });
+    const blog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
     res.status(200).json(blog);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching blog", error: error.message });
   }
 };
 
-// POST /api/blogs (Admin Only)
+// 3. Create blog (Admin only)
 exports.createBlog = async (req, res) => {
   try {
-    let coverImageUrl = "";
-    if (req.file) {
-      coverImageUrl = await uploadBuffer(req.file.buffer, "blogs");
-    } else {
+    const { title, category, excerpt, content, author, authorContact, publishDate } = req.body;
+    const file = req.file || (req.files && req.files[0]);
+
+    if (!file) {
       return res.status(400).json({ message: "Cover image is required" });
     }
 
-    // Auto-generate clean slug from title if not provided
-    const slug = req.body.slug
-      ? req.body.slug.toLowerCase().trim().replace(/[\s\W-]+/g, "-")
-      : req.body.title.toLowerCase().trim().replace(/[\s\W-]+/g, "-");
-
-    const existingSlug = await Blog.findOne({ slug });
-    if (existingSlug) {
-      return res.status(400).json({ message: "Slug already exists, please provide a unique slug" });
+    let imageUrl = "";
+    if (file.path) {
+      imageUrl = file.path;
+    } else if (file.buffer) {
+      const b64 = Buffer.from(file.buffer).toString("base64");
+      const dataURI = `data:${file.mimetype || "image/jpeg"};base64,${b64}`;
+      const uploadRes = await cloudinary.uploader.upload(dataURI, {
+        folder: "ecell/blogs",
+      });
+      imageUrl = uploadRes.secure_url;
     }
 
-    const tags = req.body.tags
-      ? Array.isArray(req.body.tags)
-        ? req.body.tags
-        : req.body.tags.split(",").map((t) => t.trim())
-      : [];
-
-    const blog = await Blog.create({
-      title: req.body.title,
-      slug,
-      content: req.body.content,
-      author: req.body.author,
-      coverImageUrl,
-      tags,
+    const newBlog = new Blog({
+      title,
+      category,
+      excerpt,
+      content,
+      author: author || "E-Cell JNCTPU Team",
+      authorContact: authorContact || "",
+      publishDate: publishDate ? new Date(publishDate) : new Date(),
+      imageUrl,
     });
 
-    res.status(201).json(blog);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    const saved = await newBlog.save();
+    res.status(201).json(saved);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to create blog", error: error.message });
   }
 };
 
-// PUT /api/blogs/:id (Admin Only)
-exports.updateBlog = async (req, res) => {
+// 4. Like / Unlike blog
+exports.likeBlog = async (req, res) => {
   try {
-    const updateData = { ...req.body };
+    const { id } = req.params;
+    const clientIp = req.ip || req.connection.remoteAddress;
 
-    if (req.file) {
-      updateData.coverImageUrl = await uploadBuffer(req.file.buffer, "blogs");
+    const blog = await Blog.findById(id);
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+
+    const alreadyLiked = blog.likedByIps.includes(clientIp);
+
+    if (alreadyLiked) {
+      blog.likes = Math.max(0, blog.likes - 1);
+      blog.likedByIps = blog.likedByIps.filter((ip) => ip !== clientIp);
+    } else {
+      blog.likes += 1;
+      blog.likedByIps.push(clientIp);
     }
 
-    if (req.body.tags && typeof req.body.tags === "string") {
-      updateData.tags = req.body.tags.split(",").map((t) => t.trim());
-    }
-
-    const updated = await Blog.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    if (!updated) return res.status(404).json({ message: "Blog not found" });
-
-    res.status(200).json(updated);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    await blog.save();
+    res.status(200).json({ likes: blog.likes, isLiked: !alreadyLiked });
+  } catch (error) {
+    res.status(500).json({ message: "Like action failed", error: error.message });
   }
 };
 
-// DELETE /api/blogs/:id (Admin Only)
+// 5. Add comment
+exports.addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, comment } = req.body;
+
+    if (!name || !comment) {
+      return res.status(400).json({ message: "Name and comment are required" });
+    }
+
+    const blog = await Blog.findById(id);
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+
+    blog.comments.unshift({ name, comment, createdAt: new Date() });
+    await blog.save();
+
+    res.status(201).json({ comments: blog.comments });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to post comment", error: error.message });
+  }
+};
+
+// 6. Delete blog (Admin only)
 exports.deleteBlog = async (req, res) => {
   try {
-    const deleted = await Blog.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Blog not found" });
-
+    await Blog.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Blog deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ message: "Delete failed", error: error.message });
   }
 };
