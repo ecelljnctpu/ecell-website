@@ -11,6 +11,13 @@ export default function Blogs() {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [sortOption, setSortOption] = useState("latest");
 
+    const calculateReadTime = (text = "") => {
+        const wordsPerMinute = 200;
+        const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+        const minutes = Math.ceil(wordCount / wordsPerMinute);
+        return minutes > 0 ? `${minutes} min read` : "1 min read";
+    };
+
     const categories = [
         "All",
         "Startup & Innovation",
@@ -20,26 +27,24 @@ export default function Blogs() {
         "Founder Stories",
     ];
 
-    const fetchBlogs = async () => {
-        try {
-            setLoading(true);
-            const res = await axios.get(
-                `${API_BASE}/api/blogs?search=${search}&category=${selectedCategory}&sort=${sortOption}`
-            );
-            setBlogs(res.data || []);
-        } catch (err) {
-            console.error("Error fetching blogs:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const fetchBlogs = async () => {
+  try {
+    setLoading(true);
+    const categoryParam =
+      selectedCategory === "All"
+        ? ""
+        : `&category=${encodeURIComponent(selectedCategory)}`;
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchBlogs();
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [search, selectedCategory, sortOption]);
+    const res = await axios.get(
+      `${API_BASE}/blogs?search=${encodeURIComponent(search)}${categoryParam}&sort=${sortOption}`
+    );
+    setBlogs(res.data || []);
+  } catch (err) {
+    console.error("Error fetching blogs:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
     const handleShare = async (e, blog) => {
         e.preventDefault();
@@ -98,8 +103,8 @@ export default function Blogs() {
                         <button
                             onClick={() => setSortOption("latest")}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-cinzel tracking-wider uppercase transition-all ${sortOption === "latest"
-                                    ? "bg-[#c5a059] text-[#070d18] font-bold shadow-md"
-                                    : "text-[#f3ca65] hover:bg-[#c5a059]/20"
+                                ? "bg-[#c5a059] text-[#070d18] font-bold shadow-md"
+                                : "text-[#f3ca65] hover:bg-[#c5a059]/20"
                                 }`}
                         >
                             <Clock size={14} /> Latest
@@ -107,8 +112,8 @@ export default function Blogs() {
                         <button
                             onClick={() => setSortOption("trending")}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-cinzel tracking-wider uppercase transition-all ${sortOption === "trending"
-                                    ? "bg-[#c5a059] text-[#070d18] font-bold shadow-md"
-                                    : "text-[#f3ca65] hover:bg-[#c5a059]/20"
+                                ? "bg-[#c5a059] text-[#070d18] font-bold shadow-md"
+                                : "text-[#f3ca65] hover:bg-[#c5a059]/20"
                                 }`}
                         >
                             <Flame size={14} /> Trending
@@ -116,8 +121,8 @@ export default function Blogs() {
                         <button
                             onClick={() => setSortOption("most_liked")}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-cinzel tracking-wider uppercase transition-all ${sortOption === "most_liked"
-                                    ? "bg-[#c5a059] text-[#070d18] font-bold shadow-md"
-                                    : "text-[#f3ca65] hover:bg-[#c5a059]/20"
+                                ? "bg-[#c5a059] text-[#070d18] font-bold shadow-md"
+                                : "text-[#f3ca65] hover:bg-[#c5a059]/20"
                                 }`}
                         >
                             <Heart size={14} /> Most Liked
@@ -132,8 +137,8 @@ export default function Blogs() {
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}
                             className={`px-4 py-1.5 rounded-lg text-xs font-cinzel tracking-wider uppercase transition-all shadow-sm ${selectedCategory === cat
-                                    ? "bg-[#0d182b] text-[#f3ca65] font-bold border border-[#c5a059]"
-                                    : "bg-[#e2d3b2] text-[#0f1d38] border border-[#c5a059]/40 hover:bg-[#d8c59c]"
+                                ? "bg-[#0d182b] text-[#f3ca65] font-bold border border-[#c5a059]"
+                                : "bg-[#e2d3b2] text-[#0f1d38] border border-[#c5a059]/40 hover:bg-[#d8c59c]"
                                 }`}
                         >
                             {cat}
@@ -182,68 +187,73 @@ export default function Blogs() {
                                     </div>
 
 
-                                    <div className="text-[11px] text-[#f3ca65]/80 font-cinzel mb-2 flex items-center justify-between">
-                                        <span>
-                                            {new Date(blog.publishDate || blog.createdAt).toLocaleDateString("en-IN", {
-                                                day: "numeric",
-                                                month: "short",
-                                                year: "numeric",
-                                            })}
-                                        </span>
-                                        <span className="truncate max-w-[140px] text-right">
-                                            By {blog.author}
-                                        </span>
-                                    </div>
-
-
-
-
-                                    <h3
-                                        className="text-lg font-bold font-cinzel text-white group-hover:text-[#f3ca65] transition-colors line-clamp-2 mb-2"
-                                        style={{ fontFamily: "'Cinzel', Georgia, serif" }}
-                                    >
-                                        {blog.title}
-                                    </h3>
-
-                                    <p className="text-xs text-slate-300 line-clamp-3 mb-6 font-serif leading-relaxed">
-                                        {blog.excerpt}
-                                    </p>
-
-                                    {/* Footer Actions */}
-                                    <div className="mt-auto pt-4 border-t border-slate-800 flex items-center justify-between">
-                                        <div className="flex items-center gap-4 text-xs text-[#f3ca65]">
-                                            <span className="flex items-center gap-1.5">
-                                                <Heart size={14} className="fill-[#f3ca65]/20 text-[#f3ca65]" />
-                                                {blog.likes || 0}
+                                    {/* Body Content */}
+                                    <div className="p-6 flex flex-col flex-grow">
+                                        {/* Single Clean Meta Header with Date, Author & Read Time */}
+                                        <div className="flex items-center justify-between text-[11px] text-[#f3ca65]/80 font-cinzel mb-2">
+                                            <span>
+                                                {new Date(blog.publishDate || blog.createdAt).toLocaleDateString("en-IN", {
+                                                    day: "numeric",
+                                                    month: "short",
+                                                    year: "numeric",
+                                                })}
                                             </span>
-                                            <span className="flex items-center gap-1.5 text-slate-400">
-                                                <MessageSquare size={14} />
-                                                {blog.comments?.length || 0}
+                                            <span className="text-slate-400 font-serif">
+                                                {calculateReadTime(blog.content)}
                                             </span>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <button
-                                                onClick={(e) => handleShare(e, blog)}
-                                                className="p-1.5 rounded-lg bg-[#c5a059]/20 hover:bg-[#c5a059] text-[#f3ca65] hover:text-[#0b1626] transition-colors"
-                                                title="Share"
-                                            >
-                                                <Share2 size={14} />
-                                            </button>
-                                            <Link
-                                                to={`/blog/${blog._id}`}
-                                                className="px-3 py-1.5 rounded-lg bg-[#c5a059]/20 hover:bg-[#c5a059] text-[#f3ca65] hover:text-[#0b1626] text-xs font-cinzel font-bold tracking-wider transition-colors"
-                                            >
-                                                READ MORE →
-                                            </Link>
+                                        <div className="text-[11px] text-slate-300 font-serif italic mb-2">
+                                            By <span className="text-[#f3ca65] font-semibold">{blog.author || "E-Cell Team"}</span>
+                                        </div>
+
+                                        {/* Blog Title */}
+                                        <h3
+                                            className="text-lg font-bold font-cinzel text-white group-hover:text-[#f3ca65] transition-colors line-clamp-2 mb-2"
+                                            style={{ fontFamily: "'Cinzel', Georgia, serif" }}
+                                        >
+                                            {blog.title}
+                                        </h3>
+
+                                        <p className="text-xs text-slate-300 line-clamp-3 mb-6 font-serif leading-relaxed">
+                                            {blog.excerpt}
+                                        </p>
+
+                                        {/* Footer Actions */}
+                                        <div className="mt-auto pt-4 border-t border-slate-800 flex items-center justify-between">
+                                            <div className="flex items-center gap-4 text-xs text-[#f3ca65]">
+                                                <span className="flex items-center gap-1.5">
+                                                    <Heart size={14} className="fill-[#f3ca65]/20 text-[#f3ca65]" />
+                                                    {blog.likes || 0}
+                                                </span>
+                                                <span className="flex items-center gap-1.5 text-slate-400">
+                                                    <MessageSquare size={14} />
+                                                    {blog.comments?.length || 0}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={(e) => handleShare(e, blog)}
+                                                    className="p-1.5 rounded-lg bg-[#c5a059]/20 hover:bg-[#c5a059] text-[#f3ca65] hover:text-[#0b1626] transition-colors"
+                                                    title="Share"
+                                                >
+                                                    <Share2 size={14} />
+                                                </button>
+                                                <Link
+                                                    to={`/blog/${blog._id}`}
+                                                    className="px-3 py-1.5 rounded-lg bg-[#c5a059]/20 hover:bg-[#c5a059] text-[#f3ca65] hover:text-[#0b1626] text-xs font-cinzel font-bold tracking-wider transition-colors"
+                                                >
+                                                    READ MORE →
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                         ))}
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
         </div>
-    );
+            );
 }

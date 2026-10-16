@@ -160,10 +160,79 @@ export default function BlogDetail() {
           </div>
 
           {/* Article Full Body Content */}
-          <div className="text-slate-200 font-serif leading-relaxed text-sm sm:text-base space-y-4 whitespace-pre-line pt-4">
-            {blog.content}
-          </div>
-        </div>
+        {/* Article Full Body Content with Proper Headings & Spacing */}
+<div className="space-y-6 text-slate-200 font-serif leading-relaxed text-base sm:text-lg pt-4">
+  {blog.content.split(/\n\s*\n/).map((block, index) => {
+    const trimmed = block.trim();
+    if (!trimmed) return null;
+
+    // 1. Main Heading (# ya ## ya Heading pattern)
+    if (
+      trimmed.startsWith("# ") ||
+      trimmed.startsWith("## ") ||
+      (trimmed.length < 70 && !trimmed.endsWith(".") && !trimmed.includes(",") && !trimmed.includes(":"))
+    ) {
+      const cleanHeading = trimmed.replace(/^#+\s*/, "");
+      return (
+        <h2
+          key={index}
+          className="text-2xl sm:text-4xl font-extrabold font-cinzel text-[#f3ca65] pt-8 pb-3 border-b border-[#c5a059]/30 tracking-tight"
+          style={{ fontFamily: "'Cinzel', Georgia, serif" }}
+        >
+          {cleanHeading}
+        </h2>
+      );
+    }
+
+    // 2. Sub-heading (###)
+    if (trimmed.startsWith("### ")) {
+      return (
+        <h3
+          key={index}
+          className="text-xl sm:text-2xl font-bold font-cinzel text-white pt-6 pb-2"
+          style={{ fontFamily: "'Cinzel', Georgia, serif" }}
+        >
+          {trimmed.replace(/^###\s*/, "")}
+        </h3>
+      );
+    }
+
+    // 3. Bullet list item (- ya *)
+    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+      const items = trimmed.split("\n").filter(Boolean);
+      return (
+        <ul key={index} className="list-disc pl-6 space-y-2 text-slate-300 my-4">
+          {items.map((item, idx) => (
+            <li key={idx} className="leading-relaxed">
+              {item.replace(/^[-*]\s*/, "")}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    // 4. Normal Paragraph with Bold Formatting & Spacing
+    // **text** ko real <strong> me convert karega
+    const parts = trimmed.split(/(\*\*.*?\*\*)/g);
+
+    return (
+      <p key={index} className="text-slate-200 leading-8 text-base sm:text-lg font-serif">
+        {parts.map((part, pIdx) => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            return (
+              <strong key={pIdx} className="font-bold text-white tracking-wide">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return part;
+        })}
+      </p>
+    );
+  })}
+</div>
+        
+
 
 
         {/* Author & Contact Box */}
