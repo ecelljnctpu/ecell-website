@@ -17,7 +17,7 @@ export default function BlogDetail() {
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/blogs/${id}`);
+        const res = await axios.get(`${API_BASE}/api/blogs/${id}`);
         setBlog(res.data);
         setLikes(res.data.likes || 0);
       } catch (err) {
@@ -31,7 +31,7 @@ export default function BlogDetail() {
 
   const handleLike = async () => {
     try {
-      const res = await axios.post(`${API_BASE}/blogs/${id}/like`);
+   const res = await axios.post(`${API_BASE}/api/blogs/${id}/like`);
       setLikes(res.data.likes);
       setHasLiked(res.data.isLiked);
     } catch (err) {
@@ -57,7 +57,7 @@ export default function BlogDetail() {
     if (!commentName.trim() || !commentText.trim()) return;
     try {
       setPostingComment(true);
-      const res = await axios.post(`${API_BASE}/blogs/${id}/comment`, {
+      const res = await axios.post(`${API_BASE}/api/blogs/${id}/comment`, {
         name: commentName,
         comment: commentText,
       });
