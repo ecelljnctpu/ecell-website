@@ -4,7 +4,7 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const authMiddleware = require("../middlewares/authMiddleware"); // Apka JWT middleware
+const authMiddleware = require("../middleware/authMiddleware"); // Apka JWT middleware
 const blogController = require("../controllers/blogController");
 
 router.get("/", blogController.getAllBlogs);
