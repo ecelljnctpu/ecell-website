@@ -339,7 +339,7 @@ export default function AdminDashboard() {
   // Blogs fetch function
   const fetchBlogs = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/api/blogs`);
+      const res = await axios.get(`${API_BASE}/blogs`);
       setBlogs(res.data || []);
     } catch (err) {
       console.error("Error fetching blogs:", err);
@@ -370,7 +370,7 @@ export default function AdminDashboard() {
       formData.append("image", blogFile);
 
       const token = localStorage.getItem("adminToken"); // ya jahan aapka token store ho
-      await axios.post(`${API_BASE}/api/blogs`, formData, {
+      await axios.post(`${API_BASE}/blogs`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -398,7 +398,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Are you sure you want to delete this blog?")) return;
     try {
       const token = localStorage.getItem("adminToken");
-      await axios.delete(`${API_BASE}/api/blogs/${id}`, {
+      await axios.delete(`${API_BASE}/blogs/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Blog deleted!");
