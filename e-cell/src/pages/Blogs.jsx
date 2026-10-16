@@ -26,7 +26,7 @@ export default function Blogs() {
     return minutes > 0 ? `${minutes} min read` : "1 min read";
   };
 
-  const fetchBlogs = async () => {
+const fetchBlogs = async () => {
     try {
       setLoading(true);
       const categoryParam =
@@ -34,8 +34,9 @@ export default function Blogs() {
           ? ""
           : `&category=${encodeURIComponent(selectedCategory)}`;
 
+      // Yahan /api/blogs lagayein
       const res = await axios.get(
-        `${API_BASE}/blogs?search=${encodeURIComponent(search)}${categoryParam}&sort=${sortOption}`
+        `${API_BASE}/api/blogs?search=${encodeURIComponent(search)}${categoryParam}&sort=${sortOption}`
       );
       setBlogs(res.data || []);
     } catch (err) {
