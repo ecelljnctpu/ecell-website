@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /admin/login
 Disallow: /admin/dashboard
 
-Sitemap: https://your-project-name.vercel.app/sitemap.xml
+Sitemap: https://ecell-website-ruby.vercel.app/sitemap.xml
