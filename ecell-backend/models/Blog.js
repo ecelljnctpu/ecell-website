@@ -12,6 +12,12 @@ const commentSchema = new mongoose.Schema(
 const blogSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
+    slug: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: () => "blog-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7),
+    },
     category: {
       type: String,
       default: "Startup & Innovation",
@@ -26,8 +32,8 @@ const blogSchema = new mongoose.Schema(
     excerpt: { type: String, required: true, trim: true },
     content: { type: String, required: true },
     author: { type: String, default: "E-Cell JNCTPU Team" },
-    authorContact: { type: String, default: "ecell@jnctbhopal.ac.in" }, // Email / LinkedIn / Phone
-    publishDate: { type: Date, default: Date.now }, // Custom ya upload date
+    authorContact: { type: String, default: "ecell@jnctbhopal.ac.in" },
+    publishDate: { type: Date, default: Date.now },
     imageUrl: { type: String, required: true },
     likes: { type: Number, default: 0 },
     likedByIps: [{ type: String }],
