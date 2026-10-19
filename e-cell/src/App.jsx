@@ -1,4 +1,7 @@
+import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from "./components/Footer";
@@ -17,6 +20,21 @@ import Team from "./pages/Team";
 import Sponsors from "./pages/Sponsors";
 
 export default function App() {
+
+useEffect(() => {
+    // 2. AOS initialize karein
+    AOS.init({
+      duration: 800,        // Har animation 0.8s me smoothly complete hogi
+      easing: "ease-out-cubic", // Natural decelerating movement
+      once: true,           // Element sirf ek baar scroll hone par animate hoga (repeat flickering nahi hogi)
+      offset: 80,           // Screen ke 80px andar aate hi trigger hoga
+      delay: 50,            // Base delay
+    });
+
+    // Dynamic data (jaise API se aane wale cards) ke liye refresh
+    AOS.refresh();
+  }, []);
+
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
 
