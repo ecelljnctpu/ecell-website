@@ -1,186 +1,142 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useLocation, Link } from "react-router-dom";
-import axios from "axios";
-import { Calendar, MapPin, Clock, ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
-import { API_BASE } from "../config";
+import React from "react";
 import ReactMarkdown from "react-markdown";
+import { Calendar, MapPin, Clock, ExternalLink } from "lucide-react";
 
-export default function EventDetail() {
-  const { id } = useParams();
-  const { state } = useLocation();
-  const [event, setEvent] = useState(state?.event || null);
-  const [loading, setLoading] = useState(!state?.event);
-
-  useEffect(() => {
-    // Agar state me event nahi hai (jaise page refresh karne par), toh backend se fetch karenge
-    if (!event && id) {
-      const fetchEventDetail = async () => {
-        try {
-          const res = await axios.get(`${API_BASE}/api/events/${id}`);
-          setEvent(res.data);
-        } catch (err) {
-          console.error("Error fetching event detail:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchEventDetail();
-    } else {
-      setLoading(false);
-    }
-  }, [id, event]);
-
-  if (loading) {
-    return (
-      <div className="w-full min-h-screen bg-[#070d18] text-white flex items-center justify-center pt-28 font-cinzel text-xs tracking-widest text-[#f3ca65]">
-        LOADING EVENT DETAILS...
-      </div>
-    );
-  }
-
-  if (!event) {
-    return (
-      <div className="w-full min-h-screen bg-[#070d18] text-white flex flex-col items-center justify-center pt-28 space-y-4">
-        <p className="font-cinzel text-sm text-red-400">Event not found.</p>
-        <Link to="/events" className="text-xs font-cinzel text-[#f3ca65] underline">
-          Back to Events
-        </Link>
-      </div>
-    );
-  }
-
-  // Admin dwara di gayi registration link (chahe registrationLink ho ya regLink/url)
-  const regLink = event.registrationLink || event.regLink || event.url || "#";
+export default function EventDetail({ event }) {
+  if (!event) return null;
 
   return (
-    <div className="w-full min-h-screen bg-[#070d18] text-white pt-28 pb-24 px-4 sm:px-8 selection:bg-[#c5a059] selection:text-black">
-      <div className="max-w-5xl mx-auto space-y-10">
-
-        {/* Back Button */}
-        <Link to="/events" className="inline-flex items-center gap-2 text-xs font-cinzel text-[#f3ca65] hover:underline tracking-widest">
-          <ArrowLeft size={16} /> Back to Events
-        </Link>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-
-          {/* Left Details */}
+    <div className="min-h-screen bg-[#070d18] text-slate-100 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Main 2-Column Responsive Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          
+          {/* ================= LEFT SIDE: Content & Description (7 Cols) ================= */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0d182b] border border-[#c5a059]/40 text-[#f3ca65] text-xs font-cinzel tracking-widest uppercase">
-              <Sparkles size={12} /> {event.category || event.tag || "EVENT"}
-            </div>
-
-            <h1 className="text-3xl sm:text-5xl font-black font-cinzel tracking-tight uppercase text-white" style={{ fontFamily: "'Cinzel', Georgia, serif" }}>
+            
+            {/* Event Title */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-cinzel text-transparent bg-clip-text bg-gradient-to-r from-[#f9e7b9] via-[#e5c378] to-[#c5a059] leading-tight">
               {event.title}
             </h1>
 
-
-
-            <div className="event-description text-slate-300 text-sm sm:text-base font-serif leading-relaxed">
+            {/* Markdown Description with Bigger & Clear Fonts */}
+            <div className="event-description text-slate-200 font-serif leading-relaxed pt-2">
               <ReactMarkdown
                 components={{
-                  h3: (props) => (
-                    <h3 className="text-lg sm:text-xl font-bold font-cinzel text-[#f3ca65] mt-5 mb-2" {...props} />
-                  ),
                   h2: (props) => (
-                    <h2 className="text-xl sm:text-2xl font-bold font-cinzel text-[#f3ca65] mt-6 mb-3" {...props} />
+                    <h2 className="text-2xl sm:text-3xl font-bold font-cinzel text-[#f3ca65] mt-8 mb-4 border-b border-[#c5a059]/20 pb-2" {...props} />
+                  ),
+                  h3: (props) => (
+                    <h3 className="text-xl sm:text-2xl font-bold font-cinzel text-[#f3ca65] mt-6 mb-3" {...props} />
                   ),
                   strong: (props) => (
-                    <strong className="font-bold text-[#f2e3c6]" {...props} />
+                    <strong className="font-bold text-[#fae8c8]" {...props} />
                   ),
                   p: (props) => (
-                    <p className="mb-3 leading-relaxed" {...props} />
+                    <p className="text-base sm:text-lg text-slate-300 leading-relaxed mb-4 tracking-normal" {...props} />
                   ),
                   ul: (props) => (
-                    <ul className="list-disc list-inside space-y-1.5 my-3 pl-2 text-slate-300" {...props} />
+                    <ul className="list-disc list-outside space-y-2.5 my-4 pl-6 text-slate-300 text-base sm:text-lg" {...props} />
                   ),
                   li: (props) => (
-                    <li className="leading-relaxed" {...props} />
+                    <li className="leading-relaxed pl-1" {...props} />
                   ),
                 }}
               >
                 {event.description || "No description available for this event."}
               </ReactMarkdown>
             </div>
+          </div>
 
 
+          {/* ================= RIGHT SIDE: Sticky Poster & Action Card (5 Cols) ================= */}
+          <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
+            
+            {/* Poster Image with Golden Border Glow */}
+            <div className="relative group rounded-2xl overflow-hidden border border-[#c5a059]/40 shadow-[0_10px_30px_rgba(0,0,0,0.6)] bg-[#0b1626]">
+              <img
+                src={event.image || event.poster || "/placeholder-event.jpg"}
+                alt={event.title}
+                className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              />
+            </div>
 
-
-            {/* Meta Boxes */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-              {/* Meta Boxes */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                <div className="bg-[#0b1626] border border-[#c5a059]/30 rounded-xl p-4 flex items-center gap-3">
-                  <Calendar className="text-[#f3ca65]" size={20} />
+            {/* Meta Information Cards (Date, Venue, Time) */}
+            <div className="bg-[#0b1626]/90 border border-[#c5a059]/30 rounded-2xl p-5 space-y-4 backdrop-blur-md shadow-lg">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                
+                {/* Date Box */}
+                <div className="bg-[#0e1c31] border border-[#c5a059]/20 rounded-xl p-3.5 flex items-center gap-3">
+                  <Calendar className="text-[#f3ca65] shrink-0" size={22} />
                   <div>
-                    <p className="text-[10px] text-slate-400 font-cinzel">DATE</p>
-                    <p className="text-xs sm:text-sm font-semibold text-[#f2e3c6] font-cinzel">
-                      {event?.date
+                    <p className="text-[11px] text-slate-400 font-cinzel uppercase tracking-wider">Date</p>
+                    <p className="text-sm font-semibold text-[#f2e3c6] font-cinzel">
+                      {event.date
                         ? new Date(event.date).toLocaleDateString("en-US", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
                         : "Date TBA"}
                     </p>
                   </div>
                 </div>
 
-                {/* Baaki ke boxes (Venue wagera) bilkul waise hi rahenge */}
-
-                <div className="bg-[#0b1626] border border-[#c5a059]/30 rounded-xl p-4 flex items-center gap-3">
-                  <MapPin className="text-[#f3ca65]" size={20} />
+                {/* Venue Box */}
+                <div className="bg-[#0e1c31] border border-[#c5a059]/20 rounded-xl p-3.5 flex items-center gap-3">
+                  <MapPin className="text-[#f3ca65] shrink-0" size={22} />
                   <div>
-                    <p className="text-[10px] text-slate-400 font-cinzel">VENUE</p>
-                    <p className="text-xs font-bold font-serif">{event.venue || "On Campus"}</p>
+                    <p className="text-[11px] text-slate-400 font-cinzel uppercase tracking-wider">Venue</p>
+                    <p className="text-sm font-semibold text-[#f2e3c6] font-cinzel truncate max-w-[150px]">
+                      {event.venue || "JNCT Campus"}
+                    </p>
                   </div>
                 </div>
 
-                <div className="bg-[#0b1626] border border-[#c5a059]/30 rounded-xl p-4 flex items-center gap-3">
-                  <Clock className="text-[#f3ca65]" size={20} />
+              </div>
+
+              {/* Start Time (Agar available ho) */}
+              {event.time && (
+                <div className="bg-[#0e1c31] border border-[#c5a059]/20 rounded-xl p-3.5 flex items-center gap-3">
+                  <Clock className="text-[#f3ca65] shrink-0" size={22} />
                   <div>
-                    <p className="text-[10px] text-slate-400 font-cinzel">TIME</p>
-                    <p className="text-xs font-bold font-serif">{event.time || "09:00 AM"}</p>
+                    <p className="text-[11px] text-slate-400 font-cinzel uppercase tracking-wider">Time</p>
+                    <p className="text-sm font-semibold text-[#f2e3c6] font-cinzel">
+                      {event.time}
+                    </p>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Register CTA Button linked directly to Admin provided Unstop/Google Form URL */}
-              <div className="pt-6">
-                {regLink && regLink !== "#" ? (
-                  <a
-                    href={regLink.startsWith("http") ? regLink : `https://${regLink}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 rounded-xl bg-[#c5a059] hover:bg-[#d8b167] text-[#070d18] font-cinzel text-xs tracking-[0.25em] font-bold transition-all shadow-xl"
-                  >
-                    REGISTER NOW <ExternalLink size={16} />
-                  </a>
-                ) : (
-                  <button
-                    disabled
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 rounded-xl bg-slate-700 text-slate-400 font-cinzel text-xs tracking-[0.25em] font-bold cursor-not-allowed"
-                  >
-                    REGISTRATION LINK NOT PROVIDED
-                  </button>
-                )}
-              </div>
-            </div>
+              {/* Big Register Now Button */}
+              {event.registrationLink ? (
+                <a
+                  href={event.registrationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full mt-2 inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-bold font-cinzel text-[#0a121e] bg-gradient-to-r from-[#d4af37] via-[#f3ca65] to-[#c5a059] hover:brightness-110 active:scale-[0.98] transition-all shadow-[0_4px_15px_rgba(212,175,55,0.3)] text-base"
+                >
+                  <span>REGISTER NOW</span>
+                  <ExternalLink size={18} />
+                </a>
+              ) : (
+                <button
+                  disabled
+                  className="w-full mt-2 py-3.5 px-6 rounded-xl font-semibold font-cinzel text-slate-400 bg-slate-800 cursor-not-allowed text-center text-sm"
+                >
+                  REGISTRATIONS CLOSED
+                </button>
+              )}
 
-            {/* Right Banner Image */}
-            <div className="lg:col-span-5">
-              <div className="rounded-2xl border border-[#c5a059]/40 overflow-hidden shadow-2xl bg-[#0b1626] p-2">
-                <img
-                  src={event.bannerUrl || event.image || "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80"}
-                  alt={event.title}
-                  className="w-full h-80 sm:h-96 object-cover rounded-xl"
-                />
-              </div>
             </div>
 
           </div>
 
         </div>
+
       </div>
-      </div>
-      );
+    </div>
+  );
 }
