@@ -45,7 +45,7 @@ export default function EventPage() {
   return (
     <div className="w-full min-h-screen bg-[#070d18] text-white pt-28 pb-24 px-4 sm:px-8 relative z-10 selection:bg-[#c5a059] selection:text-black">
       <div className="max-w-7xl mx-auto space-y-10">
-        
+
         {/* Header & Filters */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-[#c5a059]/20">
           <div>
@@ -75,11 +75,10 @@ export default function EventPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-2 rounded-full text-xs font-cinzel tracking-wider uppercase transition-all ${
-                activeTab === tab
+              className={`px-5 py-2 rounded-full text-xs font-cinzel tracking-wider uppercase transition-all ${activeTab === tab
                   ? "bg-[#c5a059] text-[#070d18] font-bold shadow-lg"
                   : "bg-[#0d182b] text-slate-300 border border-[#c5a059]/30 hover:border-[#f3ca65]"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -118,7 +117,15 @@ export default function EventPage() {
                     <div className="space-y-2 text-xs text-slate-300 font-serif border-t border-slate-800 pt-4">
                       <div className="flex items-center gap-2">
                         <Calendar size={14} className="text-[#f3ca65]" />
-                        <span>{event.date}</span>
+                        <span>
+                          {event.date
+                            ? new Date(event.date).toLocaleDateString("en-US", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                            : "Date TBA"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <MapPin size={14} className="text-[#f3ca65]" />
