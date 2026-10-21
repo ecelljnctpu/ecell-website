@@ -63,7 +63,15 @@ export default function HomeEventsPreview() {
                   <div className="space-y-2 text-xs text-slate-300 font-serif border-t border-slate-800 pt-4">
                     <div className="flex items-center gap-2">
                       <Calendar size={14} className="text-[#f3ca65]" />
-                      <span>{event.date}</span>
+                      <span>
+                          {event.date
+                            ? new Date(event.date).toLocaleDateString("en-US", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })
+                            : "Date TBA"}
+                        </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <MapPin size={14} className="text-[#f3ca65]" />
